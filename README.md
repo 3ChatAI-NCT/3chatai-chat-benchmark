@@ -39,14 +39,28 @@
 ## 评测工作流
 
 ```mermaid
+---
+config:
+  htmlLabels: false
+  flowchart:
+    htmlLabels: false
+---
 flowchart LR
-    A["<b>关联空间</b><br/><small>线上来源 · EVAL 空间</small>"] --> B["<b>采集样本</b><br/><small>线上只读</small>"]
-    B --> C["<b>整理草稿</b><br/><small>脱敏 · 参考回复</small>"]
-    C --> D["<b>审核发布</b><br/><small>不可变数据集版本</small>"]
-    D --> E["<b>创建评测</b><br/><small>冻结配置</small>"]
-    E --> F["<b>执行与判分</b><br/><small>Worker · LLM Judge</small>"]
-    F --> G["<b>证据与报告</b><br/><small>逐条可追溯</small>"]
-    G --> H["<b>专家复核</b><br/><small>主责 FDE</small>"]
+    A["`**关联空间**
+    线上来源 · EVAL 空间`"] --> B["`**采集样本**
+    线上只读`"]
+    B --> C["`**整理草稿**
+    脱敏 · 参考回复`"]
+    C --> D["`**审核发布**
+    不可变数据集版本`"]
+    D --> E["`**创建评测**
+    冻结配置`"]
+    E --> F["`**执行与判分**
+    Worker · LLM Judge`"]
+    F --> G["`**证据与报告**
+    逐条可追溯`"]
+    G --> H["`**专家复核**
+    主责 FDE`"]
     H -.->|修订金标| C
 
     classDef prepare fill:#EEF2FF,stroke:#6366F1,stroke-width:1.5px,color:#1E1B4B
@@ -102,25 +116,43 @@ flowchart LR
 ## 架构
 
 ```mermaid
+---
+config:
+  htmlLabels: false
+  flowchart:
+    htmlLabels: false
+    nodeSpacing: 40
+    rankSpacing: 55
+---
 flowchart TB
-    UI["<b>评测工作台</b><br/><small>React · HeroUI</small>"]
-    GW["<b>统一网关</b><br/><small>登录鉴权 · 可信身份注入</small>"]
-    REG["<b>空间台账</b><br/><small>评测空间与主责人</small>"]
+    UI["`**3Chat 评测工作台**
+    3Chat Agent Eval`"]
+    GW["`**网关 Gateway**
+    登录鉴权 · 可信身份注入`"]
+    REG["`**空间台账**
+    EVAL 空间 · 主责 FDE`"]
 
     subgraph CORE["评测服务"]
-        API["<b>API 服务</b><br/><small>输入合同 · 编排 · 脱敏投影</small>"]
-        WK["<b>任务引擎</b><br/><small>租约调度 · 执行 · 判分 · 报告</small>"]
+        API["`**API 服务**
+        输入合同 · 编排 · 脱敏投影`"]
+        WK["`**任务引擎 Worker**
+        调度 · 执行 · 判分 · 报告`"]
     end
 
     subgraph DATA["数据层"]
-        PG[("<b>PostgreSQL</b><br/><small>事实 · 审计 · 任务队列</small>")]
-        OSS[("<b>对象存储</b><br/><small>样本快照 · 脱敏报告包</small>")]
+        PG[("`**PostgreSQL**
+        事实 · 审计 · 任务队列`")]
+        OSS[("`**对象存储 OSS**
+        样本快照 · 脱敏报告包`")]
     end
 
     subgraph EXT["外部系统"]
-        SRC["<b>线上数据源</b><br/><small>会话 · 画像 · 请求日志</small>"]
-        EVAL["<b>EVAL 空间</b><br/><small>隔离的回放执行环境</small>"]
-        LLM["<b>模型网关</b><br/><small>候选模型 · LLM Judge</small>"]
+        SRC["`**线上数据源**
+        会话 · 画像 · 请求日志`"]
+        EVAL["`**EVAL 空间**
+        隔离的回放执行环境`"]
+        LLM["`**模型网关**
+        候选模型 · LLM Judge`"]
     end
 
     UI --> GW
@@ -157,4 +189,3 @@ flowchart TB
 | `Result` | 每次执行及其判分结果 |
 | `Review` | 以追加方式记录的人工判断 |
 
-PostgreSQL 保存上述事实与带租约的任务队列，Worker 领取采集、执行、判分、标注与报告任务；大对象与脱敏报告包存入私有 OSS。除 PostgreSQL 与 OSS 外，不依赖 Redis 等额外中间件。
